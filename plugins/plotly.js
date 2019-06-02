@@ -4,11 +4,6 @@ const R = require("ramda");
 const moment = require("moment");
 var path = require("path");
 
-// TODO:
-// * Commit only neccesary files to:
-// git@github.com:benjamin-glitsos/gekko-plotly-plugin.git
-// * Write quick readme
-
 // Gekko imports --------------------
 
 const log = require("../core/log");
