@@ -30,6 +30,14 @@ defaults.plotly = {
         },
         additional: {}
     },
+    performanceReport: {
+        enabled: true,
+        items: [
+            ["Market", "market"],
+            ["Profit", "profit"],
+            ["Relative", "relativeProfit"]
+        ]
+    },
     data: {
         price: {
             enabled: true,
@@ -100,17 +108,57 @@ const plotlyDate = unixDate => {
 
 const plotlyDates = unixDates => R.map(plotlyDate, unixDates);
 
+const performanceList = (config, performanceReport) =>
+    R.map(x => [x[0], performanceReport[x[1]]], config);
+
+const performanceHtml = a =>
+    `<div class="performance">${R.join(
+        " ",
+        R.map(
+            b =>
+                `<span class="performance-item"><span class="performance-item-name">${
+                    b[0]
+                }:</span> <span class="performance-item-value">${b[1].toFixed(
+                    2
+                )}</span></span>`,
+            a
+        )
+    )}</div>`;
+
+const plotStyles = R.trim(`
+.performance {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    padding-bottom: 8px;
+    z-index: 1;
+}
+.performance-item {
+    padding: 0 6px;
+}
+.performance-item-name {
+    font-weight: bold;
+}
+.performance-item-value {
+    font-size: 1.15em;
+}
+`);
+
 // Plotly --------------------
 
 const Plotly = function() {
+    this.performanceReport;
     this.candles = [];
     this.trades = [];
     this.strategy = [];
 
-    if (!config.plotly.data.price.enabled && !config.plotly.data.volume.enabled)
+    if (
+        !config.plotter.data.price.enabled &&
+        !config.plotter.data.volume.enabled
+    )
         this.processStratCandles = null;
-    if (!config.plotly.data.trades.enabled) this.processTradeCompleted = null;
-    if (!config.plotly.data.strategy.enabled) this.processStratUpdate = null;
+    if (!config.plotter.data.trades.enabled) this.processTradeCompleted = null;
+    if (!config.plotter.data.strategy.enabled) this.processStratUpdate = null;
 
     _.bindAll(this);
 };
@@ -139,11 +187,19 @@ Plotly.prototype.processStratUpdate = function(stratUpdate) {
     });
 };
 
+Plotter.prototype.processPerformanceReport = function(performanceReport) {
+    this.performanceReport = performanceReport;
+};
+
 Plotly.prototype.finalize = function(done) {
     const data = {};
 
     data.stats = {};
     data.chart = [];
+
+    data.stats.date = plotlyDates(propList("start", this.candles));
+
+    data.stats.performanceReport = this.performanceReport;
 
     data.layout = {
         title: `${config.tradingAdvisor.method} : ${
@@ -170,8 +226,6 @@ Plotly.prototype.finalize = function(done) {
         },
         ...config.plotly.layout.additional
     };
-
-    data.stats.date = plotlyDates(propList("start", this.candles));
 
     if (config.plotly.data.price.enabled) {
         data.stats.price = R.zipWith(
@@ -323,6 +377,16 @@ Plotly.prototype.finalize = function(done) {
     };
 
     if (config.plotly.write.enabled) {
+        const performanceBar = config.plotter.performanceReport.enabled
+            ? R.compose(
+                  performanceHtml,
+                  performanceList
+              )(
+                  config.plotter.performanceReport.items,
+                  data.stats.performanceReport
+              )
+            : "";
+
         const plotHtml = `<!DOCTYPE html>
 <html lang="en">
         <head>
@@ -331,6 +395,7 @@ Plotly.prototype.finalize = function(done) {
             <script type="text/javascript" src="https://cdn.plot.ly/plotly-latest.min.js"></script>
         </head>
         <body>
+            ${performanceBar}
             <div id="chart"></div>
             <script type="text/javascript">
                 const data = ${jstr(data)};
