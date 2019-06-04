@@ -17,6 +17,17 @@ defaults.plotly = {
         enabled: true,
         path: ""
     },
+    performanceReport: {
+        enabled: true,
+        items: [
+            ["Market", "market"],
+            ["Profit", "profit"],
+            ["Relative", "relativeProfit"]
+        ]
+    },
+    css: {
+        additional: ""
+    },
     layout: {
         autosize: true,
         height: 620,
@@ -29,14 +40,6 @@ defaults.plotly = {
             year: [1, 3]
         },
         additional: {}
-    },
-    performanceReport: {
-        enabled: true,
-        items: [
-            ["Market", "market"],
-            ["Profit", "profit"],
-            ["Relative", "relativeProfit"]
-        ]
     },
     data: {
         price: {
@@ -152,13 +155,10 @@ const Plotly = function() {
     this.trades = [];
     this.strategy = [];
 
-    if (
-        !config.plotter.data.price.enabled &&
-        !config.plotter.data.volume.enabled
-    )
+    if (!config.plotly.data.price.enabled && !config.plotly.data.volume.enabled)
         this.processStratCandles = null;
-    if (!config.plotter.data.trades.enabled) this.processTradeCompleted = null;
-    if (!config.plotter.data.strategy.enabled) this.processStratUpdate = null;
+    if (!config.plotly.data.trades.enabled) this.processTradeCompleted = null;
+    if (!config.plotly.data.strategy.enabled) this.processStratUpdate = null;
 
     _.bindAll(this);
 };
@@ -187,7 +187,7 @@ Plotly.prototype.processStratUpdate = function(stratUpdate) {
     });
 };
 
-Plotter.prototype.processPerformanceReport = function(performanceReport) {
+Plotly.prototype.processPerformanceReport = function(performanceReport) {
     this.performanceReport = performanceReport;
 };
 
@@ -204,7 +204,9 @@ Plotly.prototype.finalize = function(done) {
     data.layout = {
         title: `${config.tradingAdvisor.method} : ${
             config.backtest.daterange.from
-        } to ${config.backtest.daterange.to}`,
+        } to ${config.backtest.daterange.to} : ${
+            data.stats.performanceReport.timespan
+        }`,
         autosize: config.plotly.layout.autosize,
         height: config.plotly.layout.height,
         width: config.plotly.layout.width,
@@ -377,12 +379,12 @@ Plotly.prototype.finalize = function(done) {
     };
 
     if (config.plotly.write.enabled) {
-        const performanceBar = config.plotter.performanceReport.enabled
+        const performanceBar = config.plotly.performanceReport.enabled
             ? R.compose(
                   performanceHtml,
                   performanceList
               )(
-                  config.plotter.performanceReport.items,
+                  config.plotly.performanceReport.items,
                   data.stats.performanceReport
               )
             : "";
@@ -393,6 +395,8 @@ Plotly.prototype.finalize = function(done) {
             <meta charset="UTF-8">
             <title>${config.tradingAdvisor.method} Plot</title>
             <script type="text/javascript" src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+            <style type="text/css">${plotStyles +
+                config.plotly.css.additional}</style>
         </head>
         <body>
             ${performanceBar}
