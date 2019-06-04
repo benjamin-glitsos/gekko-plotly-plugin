@@ -39,6 +39,17 @@ To override the default settings, you can add to your `config.plotly`. Here are 
         enabled: true,
         path: ""
     },
+    performanceReport: {
+        enabled: true,
+        items: [
+            ["Market", "market"],
+            ["Profit", "profit"],
+            ["Relative", "relativeProfit"]
+        ]
+    },
+    css: {
+        additional: ""
+    },
     layout: {
         autosize: true,
         height: 620,
