@@ -41,11 +41,7 @@ To override the default settings, you can add to your `config.plotly`. Here are 
     },
     performanceReport: {
         enabled: true,
-        items: [
-            ["Market", "market"],
-            ["Profit", "profit"],
-            ["Relative", "relativeProfit"]
-        ]
+        items: []
     },
     css: {
         additional: ""
@@ -128,3 +124,17 @@ Note that the `config.plotly.data.strategy.indicators` object is empty. This is 
 The `path` is an array that points to the indicator data columns that your strategy writes to. It is the same as using dot notation, but uses an array format (see [Ramda lensPath](https://ramdajs.com/docs/#lensPath)). Most strategies write indicator data that doesn’t involve any nested values, so you probably won’t have to write `path` arrays that are more than one item long.
 
 Also, the `yaxis` properties need explanation. These can be set to either the same number as each other or different numbers to determine whether your indicators will share the same y-axis or different ones.
+
+Also, you can add items from the performance report to the bottom of the screen like so:
+
+```
+performanceReport: {
+    enabled: true,
+    items: [
+        ["Market", "market"],
+        ["Profit", "profit"],
+        ["Relative", "relativeProfit"]]
+},
+```
+
+where the second item in each pair is the property name within `data.stats.performanceReport`.

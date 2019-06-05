@@ -19,11 +19,7 @@ defaults.plotly = {
     },
     performanceReport: {
         enabled: true,
-        items: [
-            ["Market", "market"],
-            ["Profit", "profit"],
-            ["Relative", "relativeProfit"]
-        ]
+        items: []
     },
     css: {
         additional: ""
@@ -200,6 +196,10 @@ Plotly.prototype.finalize = function(done) {
     data.stats.date = plotlyDates(propList("start", this.candles));
 
     data.stats.performanceReport = this.performanceReport;
+
+    data.stats.performanceReport.edge =
+        data.stats.performanceReport.profit -
+        data.stats.performanceReport.market;
 
     data.layout = {
         title: `${config.tradingAdvisor.method} : ${
