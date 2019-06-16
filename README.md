@@ -1,5 +1,7 @@
 ![Gekko Plotly Plugin Plot](gekko-plotly-plugin.jpg)
 
+![Another Gekko Plotly Plugin Plot](gekko-plotly-plugin-2.jpg)
+
 This plugin can be used when running [Gekko](https://github.com/askmike/gekko) backtests from the command line.
 
 ## Installation
@@ -133,7 +135,8 @@ performanceReport: {
     items: [
         ["Market", "market"],
         ["Profit", "profit"],
-        ["Relative", "relativeProfit"]]
+        ["Relative", "relativeProfit"]
+    ]
 },
 ```
 
